@@ -1,1 +1,2 @@
-VERSION = 'v0.0.1'
+from .version import VERSION
+from .models.densepose import DensePose

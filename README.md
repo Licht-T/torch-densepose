@@ -12,7 +12,7 @@ import torch
 import PIL.Image
 import PIL.ImageDraw
 import numpy as np
-from densepose.model import DensePose
+from densepose import DensePose
 
 
 model = DensePose()

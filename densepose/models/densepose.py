@@ -15,11 +15,12 @@ from torchvision.models.detection.generalized_rcnn import GeneralizedRCNN
 from torchvision.models.detection.rpn import RPNHead
 from torchvision.ops import MultiScaleRoIAlign
 
-from densepose import msra_resnet
-from densepose.extra_fpn_block import PanopticExtraFPNBlock
-from densepose.roi_heads import DensePoseRoIHeads, DensePoseHead, DensePosePredictor
-from densepose.rpn import CustomRegionProposalNetwork
-from densepose.transform import DensePoseRCNNTransform
+from .msra_resnet import msra_resnet101
+from .extra_fpn_block import PanopticExtraFPNBlock
+from .roi_heads import DensePoseRoIHeads, DensePoseHead, DensePosePredictor
+from .rpn import CustomRegionProposalNetwork
+from .transform import DensePoseRCNNTransform
+from .. import VERSION
 
 
 class DensePose(GeneralizedRCNN):
@@ -45,7 +46,7 @@ class DensePose(GeneralizedRCNN):
         if pretrained:
             # HACK: Temporary add MSRA ResNet to torchvison's ResNets list
             backbone_name = 'msra_resnet101'
-            tv.models.resnet.__dict__[backbone_name] = msra_resnet.msra_resnet101
+            tv.models.resnet.__dict__[backbone_name] = msra_resnet101
             backbone = tv.models.detection.backbone_utils.resnet_fpn_backbone(
                 backbone_name=backbone_name,
                 pretrained=True,
@@ -156,24 +157,34 @@ class DensePose(GeneralizedRCNN):
 
         super(DensePose, self).__init__(backbone, rpn, roi_heads, transform)
 
+        if pretrained:
+            base_url = f'https://github.com/Licht-T/torch-densepose/releases/download/{VERSION}'
+            model.load_state_dict(
+                torch.hub.load_state_dict_from_url(
+                    f'{base_url}/densepose_pretrained_msra-resnet101.pth',
+                    progress=False,
+                    file_name=f'densepose_pretrained_msra-resnet101_{VERSION}.pth'
+                )
+            )
+
 
 if __name__ == '__main__':
     model = DensePose()
-    # print(type(model.state_dict()))
+    # print(type(models.state_dict()))
 
     key_map = {}
 
-    with open('detectron2.csv') as fdd, open('torch.csv') as fdt:
+    with open('../detectron2.csv') as fdd, open('../torch.csv') as fdt:
         rd = csv.reader(fdd)
         rt = csv.reader(fdt)
 
         for frm, to in zip(rt, rd):
             key_map[frm[0]] = to[0]
 
-    with open('model.pkl', 'rb') as fd:
+    with open('../model.pkl', 'rb') as fd:
         pkl = pickle.load(fd)
         # print(pkl.keys())
-        data = pkl['model']
+        data = pkl['models']
 
         for k in data.keys():
             # print(k)
@@ -213,7 +224,7 @@ if __name__ == '__main__':
     model.to(device)
     model.eval()
 
-    img = PIL.Image.open('../data/chi.jpg')
+    img = PIL.Image.open('../../data/chi.jpg')
     img_array = np.array(img, dtype=np.float32).transpose((2, 0, 1))
     img_tensor = torch.from_numpy(img_array).unsqueeze(0)
 
@@ -243,4 +254,4 @@ if __name__ == '__main__':
     seg_img.save('../data/out_seg.jpg')
 
     model = model.to('cpu')
-    torch.save(model.state_dict(), 'densepose_pretrained_msra-resnet101.pth')
+    torch.save(model.state_dict(), '../densepose_pretrained_msra-resnet101.pth')

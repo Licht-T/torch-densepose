@@ -1,12 +1,9 @@
-import torch
 from torch import Tensor
 import torch.nn as nn
-from torch.nn import functional as F
-import numpy as np
 
-from typing import Tuple, List, Dict, Optional, Callable
+from typing import Tuple, List, Optional, Callable
 
-from torchvision.ops.feature_pyramid_network import ExtraFPNBlock, LastLevelMaxPool
+from torchvision.ops.feature_pyramid_network import LastLevelMaxPool
 
 
 class PanopticExtraFPNBlock(LastLevelMaxPool):
