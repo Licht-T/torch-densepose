@@ -159,10 +159,10 @@ class DensePose(GeneralizedRCNN):
 
         if pretrained:
             base_url = f'https://github.com/Licht-T/torch-densepose/releases/download/{VERSION}'
-            model.load_state_dict(
+            self.load_state_dict(
                 torch.hub.load_state_dict_from_url(
                     f'{base_url}/densepose_pretrained_msra-resnet101.pth',
-                    progress=False,
+                    progress=True,
                     file_name=f'densepose_pretrained_msra-resnet101_{VERSION}.pth'
                 )
             )
