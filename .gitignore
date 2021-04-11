@@ -1,0 +1,5 @@
+*.csv
+*.pth
+*.pkl
+.idea/
+__pycache__
